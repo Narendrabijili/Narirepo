@@ -1,0 +1,102 @@
+Labels : those are used as selectors for other resources inside K8 and useful for filtering resources.it has only 63char values 
+
+Annotations are similar to labels, it is key value pair, But not used as selectors. and used for provision external resources to k8.we keep external information build url, image registry,
+
+Resource limiting:
+
+We need resource limiting in Kubernetes to prevent a single pod or application from consuming all CPU and memory of the worker node. It helps maintain cluster stability, ensures fair resource usage among applications, avoids server crashes, improves performance, and reduces unnecessary cloud costs. If any application uses more memory than allowed, Kubernetes restricts or restarts only that pod instead of affecting the entire cluster.
+
+
+In simple :
+
+Resource limiting is used to control CPU and memory usage for pods/containers. 
+If one pod uses very high CPU or memory, it can affect other pods, slow down the worker node, crash applications, and create cluster performance issues. 
+So resource limiting is needed to maintain cluster stability and proper resource usage.
+
+requests = minimum guaranteed resources
+limits = maximum allowed resources
+
+ resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+
+1000m (m= milli CPU) = 1 CPU core 
+
+Vertical scaling : Vertical scaling increases CPU and memory of existing pod. so it requires down time.
+
+Horizontal scaling : Horizontal scaling increases number of pods. No down time requires .
+
+Horizontal Scaling → More Advantages ✅      
+
+Because:
+
+No downtime
+Better high availability
+Better load balancing
+
+Horizontal scaling has more advantages because it provides high availability and usually no downtime. 
+Vertical scaling may require downtime because resources of existing server/pod are increased.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resources
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      requests: #soft limit
+        memory: "64Mi"
+        cpu: "100m"
+      limits: #hard limit
+        memory: "128Mi"
+        cpu: "150m"
+
+POD environment :Pod environment variables are used to pass configuration values like URLs, passwords, ports, and application settings into containers.
+
+if we consider there are in more env variables it is difficult right to pass it and excuting.so for this configmap is used 
+
+ConfigMap stores:
+
+Configuration data
+Environment variables
+
+separately from pod YAML.
+
+There is ConfigMap yaml file where we can all env variables this yaml file will use by referring .
+
+Config-map.yaml:
+ 
+apiVersion: v1
+kind: CongigMap
+metadata:
+  name: pod-config
+  labels:
+  purpose: config
+  env:dev
+data:
+  Course: "devops vth aws"
+  Duration: "120hrs"
+  Teacher: "siva"
+
+
+
+Main yaml file : 
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: env-configmap
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    envFrom:
+      - configmapRef:
+          name: myconfigmap
+
