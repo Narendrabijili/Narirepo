@@ -1,0 +1,107 @@
+Kubernetes(K8s) notes
+---------------------
+intro:-
+   Kubernetes is a production-grade, open-source platform that orchestrates the placement
+   (scheduling) and execution of application containers within and across computer clusters.
+
+1.Kubernetes, is open source platform that automates linux container operations.
+2.It eliminates many of the manual processes involved in deploying and scaling containerized applications.
+3.We can cluster, Groups of Hosts running containers, and K8s helps us
+  easily and efficiently manage those clusters.
+4.K8s was originally developed and designed by engineers at google.
+5.Google generates more than 2 billion container deployments a week-all powered by an internal platform: Brog.
+
+what can you do with Kubernetes?
+-----------
+1.Orchestrate containers across multiple hosts.
+2.Make better use of hardware to maximize resources needed to run your enterprise apps.
+3.Control and automate application deployment and updates.
+4.Mount and add storage to run stateful apps.
+5.Scale containerized application and their resources on the fly.
+6.Health-check and self-Heal your apps with auto placement, auto restart, auto replication, and autoscaling.
+7.Declaratively manage services, which guarantees the deployed
+  applications are always running how you deployed them.
+8.Kubernetes, however, relise on other projects to fully provide these orchestrated service.
+  a)Registry --Docker or atomic etc..
+  b)networking --Open switch
+  c)Telemetry -- heapster, kibana, hawkular, and elastic.
+  d)security -- LDAP, SELinux, RBAC, and OAUTH with multy-tenacy Layers.
+
+K8s terminology:
+----------------
+1.Master : the machine that controls Kubernetes nodes. This is where all task assignments originate.
+2.Node: this machine perform the requisted, Assigned tasks. The k8s Master controls them.
+3.Pod :A group of one or more containers deployed to a single node. 
+       a. all containers in a pod share an IPC, hostname, and other resources.
+4.Replication controller/ReplicaSet : this controls how many identical copies of a pod should be running somewhere on the cluster.
+5.Kublet: this service runs on nodes and eads the container manifests and ensures the defined containers are started and running.(this runs worker node)
+6.Kubectl : This is the command line configuration tool for kubernetes.
+
+https://kubernetes.io/docs/reference/glossary/?fundamental=true
+
+Kubernetes competitors:
+ 1.AKS (
+ 2.GKE (global Kubernetes)
+ 3.DOcker
+ 4.Redhat OpenShift
+ 5.AWS ECS/EKS
+  note this things not a competitors this was runs a sometimes backend runs in k8s
+
+Kubernetes Components:
+--------------------------
+master
+A)Kube-apiserver
+  1.Expose the kuberneties API
+  2.the API server is the front end for the kubernetes controle plane.
+  3.kube-apiserver is designed to scale horizontally
+B) etcd
+   consistent and highly-available key value store used as K8s'backing store for all cluster data.
+C)Kube-scheduler
+     watches newly created pods that have no node assigned, and selects a node for them to run.
+D)kube-controler-maneger
+    Logically, each controller is a separate process, but to reduse complexity, they are all complied into  a single 
+    binary and run in a single process.
+
+  a)Node controller: Responsible for noticing and responding when nodes go down.
+  b)Replication Controller:Responsible for maintaing the currect number of Pods for every replication controller obeject in the system.
+  c)Endpoint Controller : Populates the endpoint object (that is, joins servers & Pods).
+  d)Service account & Token Controller : create default accounts and API access token for namespaces.
+
+e) cloud contoller-manager
+  a.Node controller : for checking the cloud provider to determain if a node has been deleted in the cloud after it stops responding
+  b.Route Controller: For Setting up routes in the underlying cloud infrastructure
+  c.service controller : For creating updating and deleting cloud provider load balencer
+  d.Volume Controller : For creating, attaching, and mounting volumes, and interacting with the cloud provider to orchestrate volumes
+
+Node Components :
+1) Kubelet
+ a. An agent that runs on each node in the cluster. It makes sure that containers are running in a Pod.
+ b.the kublet takes a set of podspecs that are provided through various mechanisms and
+    ensures that the containers described in thse podspecs are running and healthy.
+ c. The Kubelet doesn't manage containers which were not created by k8s.
+2)kube-proxy
+ a. Kube-proxy is a network proxy that runs on each node and maintains network rules on node in our cluster
+
+3)container runtime
+  a. The container runtime is the software that is responsible for running containers.
+  b.kubernetes supports several container runtimes : Docker, containerd, cri-o, rktlet and any implimentation of the kubernetes CRI
+-----------------------------------
+3. Addons
+  1.DNS
+    a.kubernetes clusters should have cluster DNS
+    b.cluster DNS is a DNS server, in addition to the other DNS server (s) in your environment,
+       which servers DNS records for kubernetes services
+    c.Containers started by kubernetes automatically include this DNS server in their DNS serches.
+ 2.Web UI (Dashboard)
+   a.web-based UI for Kubernetes clusters.
+ 3.Container Resource Monitoring
+    records generic time-series metrics about containers in a central database, and provides a UI for browsing that data.
+ 4.Cluster-level logging
+  A cluster-Level Logging mechanism is responsible for saving container logs to a central log store with search/browsing
+    interface.
+------------------------------------------------------
+K8s Installation :
+
+1. Install and setup kubectl
+  a.curl -LO https://storage.googleapis.com/kubernetes-release/release/
+    `curl -s https://storage.googleapis.com/kubernetes-release/release/
