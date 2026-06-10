@@ -1,0 +1,278 @@
+🧠 What is Kubernetes?
+
+Kubernetes (K8s) is an open-source container orchestration platform .It will help in 
+
+🔹Deploy containers
+🔹Manage containers
+🔹Scale applications
+🔹Monitor applications
+🔹Recover failed containers automatically
+
+It will do CA management, auto healing ,auto scaling, load balancing ,rolling updates (app updates vthout downtime)
+(K8 will manages CA across automatically multiple m/c.
+In docker every thing we need to do manually .but in k8  have auto healing, auto scaling, load balancing, multi node management, storage management etc.)
+
+
+Companies use K8s for:
+
+High availability
+Automation
+Easy scaling
+Microservices
+Cloud-native applications
+
+Main Components of Kubernetes
+1.Cluster
+2.Node :🔹Master node
+        🔹 Worker node
+Master node : it controls and manages the entire K8 environment.
+ 
+🔹Main Responsibilities
+🔹Manages worker nodes
+🔹Schedules pods
+🔹Monitors cluster health
+🔹Handles API requests
+🔹Maintains desired state
+🔹Performs auto healing.
+
+🔹Worker Node :where application run's.
+
+Note: Cluster group of nodes .1. If user created a request (like create nginx) then it will go API server .
+                              2. API Server is the main entry point of Kubernetes.request valid and  Does user have permission then it will talk to ETCD and Scheduler.
+                              3.ETCD  is Kubernetes database.It stores all cluster information.  Example data stored:Pod details , Node details , Deployment info ,Secrets , Configurations
+                              4. Scheduler mean Which worker node should run the pod .suppose we have 3 worker nodes .then wjich worker node it should run it will decide .
+                                Scheduler checks : CPU availability  , Memory , Free resources depending thise resources the nginx will run on worker nodes.
+Simple flow:
+
+User creates nginx
+        ↓
+API Server receives request
+        ↓
+API Server stores data in ETCD
+        ↓
+Scheduler selects worker node
+        ↓
+Kubelet creates pod
+        ↓
+Nginx container running 
+
+
+
+
+
+🔹Kubernetes (EKS) Setup in AWS:
+
+🔹Install docker 
+🔹Then run aws configure 
+🔹Installing eksctl for cluster creation 
+🔹Installing kubectl for cluster interaction.
+
+
+🔥Docker:
+  Used to build images and pushing to registry
+
+ 🔥 Aws configure : Why #aws configure===== TO set AWS credentials and region for CLI authentication.”
+
+ #sts get-caller-identity--To verify the current IAM identity and confirm valid access before performing operations.”
+
+Purpose is Combines OS + architecture and Download correct binary for your system automatically  Makes script portable across systems
+
+"eksctl is a simplie tool to create and manage EKS clusters"
+
+“kubectl is the command-line tool used to interact with the Kubernetes cluster, deploy applications, monitor resources, and manage workloads.”
+
+
+#eksctl create cluster --config-file=eks.yaml ==== creating cluster automatically .in yaml file we mentioned your requirements.
+
+#eksctl delete cluster --name Roboshop --region us-east-1.
+
+
+This uses eksctl to:
+Read your YAML
+Create EKS cluster
+Create node group (3 nodes, spot instances)
+Configure kubectl.
+
+YAML file content :
+
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: Roboshop
+  region: us-east-1
+
+managedNodeGroups:
+  - name: devops-nodes
+    instanceTypes: ["m5.large","c3.large","c4.large","c5.large"]
+    desiredCapacity: 3
+    spot: true
+
+==========================================================================
+
+👉 In Kubernetes, the system is divided into:
+
+Control Plane (Brain) 🧠
+Worker Nodes (Hands) 🖥️
+🚀 In Amazon EKS
+
+👉 AWS manages the Control Plane for you
+
+🧠 Control Plane = Brain of Kubernetes
+
+It is responsible for:
+
+Deciding where containers should run
+Managing cluster state
+Handling API requests
+🔍 Components inside Control Plane
+
+You don’t see them directly, but they exist:
+
+🧩 1. API Server
+
+👉 Entry point for everything
+
+kubectl talks to this
+Receives commands
+
+Example:
+
+kubectl get nodes
+🧩 2. Scheduler
+
+👉 Decides:
+
+Which node should run a pod
+🧩 3. Controller Manager
+
+👉 Ensures:
+
+Desired state = Actual state
+
+Example:
+
+If pod crashes → recreate automatically
+🧩 4. etcd (Database)
+
+👉 Stores:
+
+Cluster data
+Configurations
+Current state
+🧠 What happens when you create cluster
+
+When you run:
+
+eksctl create cluster
+
+👉 AWS:
+
+Creates Control Plane (managed by EKS)
+Makes it highly available (multi-AZ)
+Secures it
+Exposes API endpoint
+🔥 Important point
+
+👉 You DON’T manage control plane in EKS
+
+AWS handles:
+
+Updates
+Scaling
+Security
+Availability
+🧩 Worker Nodes vs Control Plane
+Component	Role
+Control Plane	Brain (decisions)
+Worker Nodes	Execute containers
+🧠 Real-time example
+
+You run:
+
+kubectl create deployment nginx
+
+👉 Flow:
+
+Request → API Server
+Scheduler → picks node
+Node runs container
+Controller ensures it stays running
+💡 Interview answer
+
+👉 “What is EKS control plane?”
+
+You can say:
+
+“The control plane in EKS is the managed Kubernetes brain that handles API requests, scheduling, cluster state, and automation, and is fully managed by AWS.”
+
+🎯 Simple memory
+
+👉 Control Plane = Thinks
+👉 Nodes = Works
+
+✔️ Final clarity
+You created cluster → Control Plane created
+Then node group → Worker nodes created
+
+👉 Both together = working Kubernetes cluster
+
+======================================================================================================================
+
+
+Last login: Sat May  2 11:47:32 2026 from 18.206.107.29
+[ec2-user@ip-172-31-25-237 ~]$ docker --version
+Docker version 25.0.14, build 0bab007
+[ec2-user@ip-172-31-25-237 ~]$ aws --version
+aws-cli/2.33.15 Python/3.9.25 Linux/6.1.164-196.303.amzn2023.x86_64 source/x86_64.amzn.2023
+[ec2-user@ip-172-31-25-237 ~]$ aws configure
+AWS Access Key ID [****************GJUD]: AKIA4MI2J6L7JGX3GJUD
+AWS Secret Access Key [****************TJ5u]: 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
+Default region name [us-east-1]: us-east-1
+Default output format [json]: json
+[ec2-user@ip-172-31-25-237 ~]$ aws sts get-caller-identity
+{
+    "UserId": "AIDA4MI2J6L7FXVBWEDC5",
+    "Account": "850995573502",
+    "Arn": "arn:aws:iam::850995573502:user/iam-user"
+}
+[ec2-user@ip-172-31-25-237 ~]$ 
+
+
+
+🔥 Installing EKSCTL and KUBECTL: 
+
+eksctl is a simplie tool to create and manage EKS clusters
+
+[ec2-user@ip-172-31-25-237 ~]$ ARCH=amd64   -----Defines CPU architecture (64-bit Intel/AMD)
+[ec2-user@ip-172-31-25-237 ~]$ PLATFORM=$(uname -s)_$ARCH 
+
+Purpose is Combines OS + architecture and Download correct binary for your system automatically  Makes script portable across systems
+
+[ec2-user@ip-172-31-25-237 ~]$ curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz" ------- Downloads latest version of eksctl
+[ec2-user@ip-172-31-25-237 ~]$ curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_checksums.txt" | grep $PLATFORM | sha256sum --check ------Verifies file integrity( to check File is not corrupted ) 
+eksctl_Linux_amd64.tar.gz: OK
+[ec2-user@ip-172-31-25-237 ~]$ tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz  ---- Extracts binary file
+[ec2-user@ip-172-31-25-237 ~]$ sudo install -m 0755 /tmp/eksctl /usr/local/bin && rm /tmp/eksctl  -- Moves binary to system path
+[ec2-user@ip-172-31-25-237 ~]$ eksctl version
+0.226.0
+[ec2-user@ip-172-31-25-237 ~]$
+
+“kubectl is the command-line tool used to interact with the Kubernetes cluster, deploy applications, monitor resources, and manage workloads.”
+
+
+[ec2-user@ip-172-31-25-237 ~]$ curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl =======Downloads the kubectl binary file
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 48540k 100 48540k   0     0 31103k     0   0:00:01  0:00:01 --:--:-- 31115k
+[ec2-user@ip-172-31-25-237 ~]$ chmod +x kubectl ================================ Makes the file executable
+[ec2-user@ip-172-31-25-237 ~]$ sudo mv kubectl /usr/local/bin/ == /usr/local/bin is a global command location so we anyuser  can run so kubectl is moved to bin location so now any can access
+[ec2-user@ip-172-31-25-237 ~]$ kubectl version
+Client Version: v1.29.0-eks-5e0fdde
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
+[ec2-user@ip-172-31-25-237 ~]$ kubectl version --client
+Client Version: v1.29.0-eks-5e0fdde
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
+[ec2-user@ip-172-31-25-237 ~]$ 
+
