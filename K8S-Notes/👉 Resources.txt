@@ -1,0 +1,212 @@
+👉 Resources :
+1. Namespace
+2. Pod
+3. Deployment
+4. Service
+5. ConfigMap
+6. Secret
+7. Volume
+8. Ingress
+
+
+
+🔹 What is Namespace Resources?
+
+Namespace resources = Namespace is a logical separation inside a Kubernetes cluster.
+
+"In a Kubernetes cluster, we create logical isolated spaces called Namespaces. Namespaces are used to separate different environments such as dev, test, and prod, or different projects, while sharing the same cluster resources."
+Syntax:
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: expense
+  labels:
+    project: expense
+    environment: dev
+
+kubectl apply -f yaml.file
+
+kubectl get namespaces
+
+
+
+
+
+🔹Pod Resources: It is the smallest deployment in K8.In Pod we can have on or multiple containers.
+
+apiVersion: v1
+kind: pod
+metadata:
+  name: nginx
+  labels:
+    purpose: demo
+spec:
+  containers:
+   - name: nginx
+     image: nginx
+
+kubectl apply -f yaml.file
+
+kubectl get pods
+
+
+
+Multi IMAGE creation:
+
+
+apiVersion: v1
+kind: pod
+metadata:
+  name: multi-ca-creation
+  labels:
+    purpose: demo
+spec:
+  containers:
+   - name: nginx
+     image: nginx
+
+   - name: almalinux
+     image: almalinux:9
+
+Here we get famous error CrashLoopBackOff error it nothing but unable to start CA. there is 1/2 due to in almalinux CA there is only os there is no continuous starting processes not starting 
+
+so we need to add command to run continuous only.
+
+command: ["sleep","1000"] == this need to add to almalinux then both ca will run.
+
+
+
+#watch kubectl get pods == to see what are running 
+
+
+#kubectl describe pod multi-ca-creation== to error details 
+
+We created two CA.to login to CA
+
+#kubectl exec -it name -- bash ==Command for login to CA.
+
+
+
+#kubectl exec -it multiple-ca-creation  -c almalinux -- bash ==Command for login to particular CA in case of multi ca creation scenario 
+
+
+IF we created CA1 and CA2 in same pod there share same network and storage also. if we deleted pod then in pod then data(like logs) also will be delated .so data inside pod is temporary.
+so we need to store logs in elasticsearch  server .then will be done by sidecar CA.
+
+ec2-user@ip-172-31-25-237 K8.resources]$ kubectl get pods
+NAME                   READY   STATUS             RESTARTS     AGE
+multiple-ca-creation   1/2     CrashLoopBackOff   1 (7s ago)   13s
+[ec2-user@ip-172-31-25-237 K8.resources]$ watch kubectl get pods
+[ec2-user@ip-172-31-25-237 K8.resources]$ kubectl describe pod multiple-ca-creation
+Name:             multiple-ca-creation
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             ip-192-168-18-144.ec2.internal/192.168.18.144
+Start Time:       Tue, 19 May 2026 12:57:08 +0000
+Labels:           project=demo
+Annotations:      <none>
+Status:           Running
+IP:               192.168.6.229
+IPs:
+  IP:  192.168.6.229
+Containers:
+  nginx:
+    Container ID:   containerd://a1ed2aba4328a0912f75e838d077fa9659af6f3761a30ba1cc0602e91c3f8311
+    Image:          nginx
+    Image ID:       docker.io/library/nginx@sha256:06aa3d7be10bc6307990c81bdca075793132e9163391abc370c015e344e23128
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Tue, 19 May 2026 12:57:09 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-qj64d (ro)
+  almalinux:
+    Container ID:   containerd://a73b21cb19862e37c301a6783011b55125dea1e4f0243ff9d71fcd1b2e50e8d2
+    Image:          almalinux:9
+    Image ID:       docker.io/library/almalinux@sha256:606be3c7b71a40dd3b024646e9b5a0b5023d0fdf111060f249b08f04cec0ca3e
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Tue, 19 May 2026 13:02:55 +0000
+      Finished:     Tue, 19 May 2026 13:02:55 +0000
+    Ready:          False
+    Restart Count:  6
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-qj64d (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-qj64d:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                     From               Message
+  ----     ------     ----                    ----               -------
+  Normal   Scheduled  7m54s                   default-scheduler  Successfully assigned default/multiple-ca-creation to ip-192-168-18-144.ec2.internal
+  Normal   Pulling    7m53s                   kubelet            Pulling image "nginx"
+  Normal   Pulled     7m53s                   kubelet            Successfully pulled image "nginx" in 128ms (128ms including waiting). Image size: 63079439 bytes.
+  Normal   Created    7m53s                   kubelet            Created container: nginx
+  Normal   Started    7m53s                   kubelet            Started container nginx
+  Normal   Pulling    7m53s                   kubelet            Pulling image "almalinux:9"
+  Normal   Pulled     7m49s                   kubelet            Successfully pulled image "almalinux:9" in 4.135s (4.135s including waiting). Image size: 71281367 bytes.
+  Warning  BackOff    2m20s (x26 over 7m47s)  kubelet            Back-off restarting failed container almalinux in pod multiple-ca-creation_default(63cd1885-f910-4038-8520-5b9533a5496f)
+  Normal   Created    2m7s (x7 over 7m49s)    kubelet            Created container: almalinux
+  Normal   Started    2m7s (x7 over 7m48s)    kubelet            Started container almalinux
+  Normal   Pulled     2m7s (x6 over 7m48s)    kubelet            Container image "almalinux:9" already present on machine
+[ec2-user@ip-172-31-25-237 K8.resources]$ git pull
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (1/1), done.
+remote: Total 3 (delta 2), reused 3 (delta 2), pack-reused 0 (from 0)
+Unpacking objects: 100% (3/3), 296 bytes | 296.00 KiB/s, done.
+From https://github.com/Narendrabijili/K8.resources
+   76a25bd..ef98daf  main       -> origin/main
+Updating 76a25bd..ef98daf
+Fast-forward
+ 03.multi-ca.yaml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+[ec2-user@ip-172-31-25-237 K8.resources]$ kubectl apply -f 03.multi-ca.yaml 
+The Pod "multiple-ca-creation" is invalid: spec: Forbidden: pod updates may not change fields other than `spec.containers[*].image`,`spec.initContainers[*].image`,`spec.activeDeadlineSeconds`,`spec.tolerations` (only additions to existing tolerations),`spec.terminationGracePeriodSeconds` (allow it to be set to 1 if it was previously negative)
+@@ -134,7 +134,10 @@
+   {
+    "Name": "almalinux",
+    "Image": "almalinux:9",
+-   "Command": null,
++   "Command": [
++    "sleep",
++    "1000"
++   ],
+    "Args": null,
+    "WorkingDir": "",
+    "Ports": null,
+
+[ec2-user@ip-172-31-25-237 K8.resources]$ kubectl delete -f 03.multi-ca.yaml 
+pod "multiple-ca-creation" deleted
+[ec2-user@ip-172-31-25-237 K8.resources]$ kubectl apply -f 03.multi-ca.yaml 
+pod/multiple-ca-creation created
+[ec2-user@ip-172-31-25-237 K8.resources]$ kubectl get pods
+NAME                   READY   STATUS    RESTARTS   AGE
+multiple-ca-creation   2/2     Running   0          22s
+[ec2-user@ip-172-31-25-237 K8.resources]$ 
